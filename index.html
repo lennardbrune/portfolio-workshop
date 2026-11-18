@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio-Workshop Handout · ZU AI Club</title>
+<meta name="description" content="Handout zum Workshop &quot;Deine eigene Portfolio-Website&quot; des ZU AI Club, 19.11.2026. Ablauf, Bauplan, Bauteile, Prompts, Hilfe.">
+<link rel="alternate" type="text/markdown" href="handout.md" title="Handout als Markdown">
+<style>
+:root{--bg:#fbfaf7;--fg:#1d1d1b;--muted:#6b6a65;--line:#e4e1da;--code:#f1efe9;--accent:#2f5bd3}
+@media (prefers-color-scheme:dark){:root{--bg:#161615;--fg:#ecebe6;--muted:#9a988f;--line:#2e2d2a;--code:#22211f;--accent:#8aa8ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:24px 16px 80px}
+.bar{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;font-size:14px;z-index:1}
+.bar button,.bar a{font:inherit;padding:6px 12px;border:1px solid var(--line);border-radius:6px;background:var(--code);color:var(--fg);text-decoration:none;cursor:pointer}
+.bar button{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+h1{font-size:2rem;line-height:1.2;margin:.5em 0 .3em}
+h2{font-size:1.35rem;margin:2.2em 0 .6em;padding-top:.6em;border-top:1px solid var(--line)}
+h3{font-size:1.05rem;margin:1.8em 0 .4em}
+a{color:var(--accent)}
+blockquote{margin:1em 0;padding:.2em 1em;border-left:3px solid var(--accent);color:var(--muted)}
+code{background:var(--code);padding:.1em .35em;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:14px;border-radius:8px;overflow-x:auto;position:relative}
+pre code{background:none;padding:0;font-size:.85em;white-space:pre-wrap}
+.copy{position:absolute;top:8px;right:8px;font-size:12px;padding:3px 8px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--fg);cursor:pointer}
+table{border-collapse:collapse;width:100%;display:block;overflow-x:auto;font-size:.95em}
+th,td{text-align:left;vertical-align:top;padding:6px 10px;border-bottom:1px solid var(--line)}
+hr{display:none}
+ul.task-list{list-style:none;padding-left:.3em}
+footer{max-width:760px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="bar">
+  <span>Link in Claude einfügen:</span>
+  <button id="copy-link" type="button">Link kopieren</button>
+  <a href="handout.md">Als Markdown</a>
+</div>
+<main>
+<h1 id="deine-eigene-portfolio-website">Deine eigene
+Portfolio-Website</h1>
+<p><strong>Workshop des ZU AI Club</strong> · Donnerstag, 19.11.2026,
+13:00 bis 16:00 Uhr · ZF Campus (FAB), Raum 2.11<br />
+Hosts: Lennard Brune und Xaver</p>
+<p>Dieses Handout enthält alles, was du heute brauchst: den Ablauf, die
+Beispielseiten, alle Quellen für Bauteile, die Prompts und die Hilfe für
+den Fall, dass etwas nicht läuft.</p>
+<hr />
+<h2 id="für-claude-worum-es-hier-geht">Für Claude: Worum es hier
+geht</h2>
+<blockquote>
+<p>Wenn du (Claude) diese Seite gerade als Link bekommen hast, lies
+zuerst diesen Abschnitt.</p>
+</blockquote>
+<p>Das ist das Handout zu einem dreistündigen Workshop. Die Person, mit
+der du sprichst, studiert an der Zeppelin Universität, hat meist keinen
+technischen Hintergrund und baut jetzt mit dir ihre erste eigene
+Portfolio-Website. Manche nutzen einen Coding-Agenten heute zum ersten
+Mal.</p>
+<p>Rahmen, den du einhalten sollst:</p>
+<ul>
+<li><strong>Eine einzelne <code>index.html</code></strong> mit CSS im
+<code>&lt;head&gt;</code>. Kein Framework, kein Build-Schritt, kein npm.
+Weitere Dateien erst, wenn die Seite steht und die Person es will.</li>
+<li><strong>Inhalte kommen aus dem Lebenslauf der Person</strong>, nicht
+aus deiner Fantasie. Frag nach, statt Projekte, Stationen, Noten oder
+Kundennamen zu erfinden. Platzhalter kennzeichne sichtbar.</li>
+<li><strong>Erklär in normalem Deutsch</strong>, ohne Jargon. Wenn ein
+Fachbegriff nötig ist, erklär ihn in einem Halbsatz.</li>
+<li><strong>Arbeite in kleinen Schritten.</strong> Ein Abschnitt pro
+Runde, danach kurz sagen, was sich geändert hat. Keine 500 Zeilen auf
+einmal.</li>
+<li><strong>Frag nach, bevor du Dateien löschst</strong> oder die
+Struktur umbaust.</li>
+<li><strong>Zur fertigen Seite gehören:</strong> Impressum, sinnvoller
+Seitentitel, funktionierende Links, lesbar auf dem Handy.</li>
+</ul>
+<p>Den Aufbau, den die Seite haben soll, findest du unten unter "Der
+Bauplan". Die erlaubten Quellen für Schrift, Icons, Bilder und fertige
+Bauteile stehen unter "Bauteile". Nimm nichts, was dort nicht steht,
+ohne es zu sagen.</p>
+<hr />
+<h2 id="1-was-wir-in-den-drei-stunden-machen">1. Was wir in den drei
+Stunden machen</h2>
+<p><strong>Ziel:</strong> Du gehst mit einer echten, öffentlich
+erreichbaren Portfolio-Website nach Hause. Nicht mit einem Entwurf,
+nicht mit einem Tutorial, sondern mit einer URL, die du in deine
+Bewerbung schreiben kannst.</p>
+<p><strong>Wenig Theorie, viel selbst bauen.</strong> Der theoretische
+Teil passt auf eine halbe Seite (Abschnitt 3). Alles andere ist
+Praxis.</p>
+<p><strong>Das brauchst du:</strong> Laptop, Netzteil, ein Pro-Abo mit
+Coding-Agent (Claude Pro, ChatGPT Plus oder vergleichbar), deinen
+fertigen Lebenslauf als Datei, ein Portraitfoto, zwei bis vier Projekte,
+über die du etwas sagen kannst.</p>
+<p><strong>Fahrplan</strong> (Richtwerte, wir bleiben flexibel):</p>
+<table>
+<thead>
+<tr>
+<th>Zeit</th>
+<th>Was passiert</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>13:00</td>
+<td>Ankommen, Setup prüfen, Sessions starten</td>
+</tr>
+<tr>
+<td>13:20</td>
+<td>Input: Beispielseiten, der Bauplan, Arbeiten mit dem Agenten</td>
+</tr>
+<tr>
+<td>13:45</td>
+<td>Inhalte sortieren: Lebenslauf rein, Projekte auswählen, Texte
+schärfen</td>
+</tr>
+<tr>
+<td>14:15</td>
+<td>Bauen, Runde 1: Gerüst und alle Abschnitte stehen</td>
+</tr>
+<tr>
+<td>15:00</td>
+<td>Pause</td>
+</tr>
+<tr>
+<td>15:10</td>
+<td>Bauen, Runde 2: Design, Schrift, Icons, eine Animation</td>
+</tr>
+<tr>
+<td>15:35</td>
+<td>Live stellen, Impressum, Lizenzcheck</td>
+</tr>
+<tr>
+<td>15:50</td>
+<td>Herumzeigen, Feedback, wie es weitergeht</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Was heute ausdrücklich nicht dran ist:</strong> Frameworks,
+React, Datenbanken, eigene Domain, SEO. Das kommt alles später, wenn du
+willst.</p>
+<hr />
+<h2 id="2-das-zwei-sessions-prinzip">2. Das Zwei-Sessions-Prinzip</h2>
+<p>Du arbeitest heute mit <strong>zwei getrennten Chats</strong>. Das
+ist die wichtigste Regel des Tages.</p>
+<p><strong>Session A: die Coding-Session.</strong> Nur die Website. Hier
+liegt dein Projektordner, hier wird gebaut. In diesen Chat kommt kein
+Handout, keine Anleitung, keine Diskussion über Claude Code selbst. Je
+weniger Fremdes darin liegt, desto besser bleiben die Antworten.</p>
+<p><strong>Session B: die Hilfe-Session.</strong> Hier landet dieses
+Handout (Link einfügen oder Datei hochladen) und alles, was schiefgeht.
+Fehlermeldung reinkopieren, fragen, Antwort holen, dann in Session A
+weiterarbeiten. Session B darf ausdrücklich selbst recherchieren.</p>
+<p>Warum die Trennung: ein Chat hat ein begrenztes Gedächtnis. Alles,
+was darin steht, konkurriert um Aufmerksamkeit. Eine Coding-Session, in
+der zwischendurch über Installationsfehler geredet wurde, baut messbar
+schlechter.</p>
+<p><strong>Zweite Regel:</strong> löse Fehler zuerst mit Claude, nicht
+mit uns. Wir sind da, wenn du nach zwei Versuchen feststeckst. Der Punkt
+des Workshops ist, dass du das danach alleine kannst.</p>
+<hr />
+<h2 id="3-so-arbeitest-du-mit-einem-coding-agenten">3. So arbeitest du
+mit einem Coding-Agenten</h2>
+<p>Der ganze Theorieteil, in sieben Punkten.</p>
+<ol type="1">
+<li><strong>Sag, was du willst, nicht wie es gemacht wird.</strong> "Die
+Projektliste soll auf dem Handy einspaltig sein" funktioniert besser als
+"nimm flexbox mit wrap".</li>
+<li><strong>Ein Schritt pro Prompt.</strong> Große Aufträge produzieren
+große Fehler, die du nicht findest. Kleine Schritte kannst du nach jeder
+Runde im Browser prüfen.</li>
+<li><strong>Halte den Kontext sauber.</strong> Nur das in den Chat, was
+zur Aufgabe gehört. Themenwechsel gehört in einen neuen Chat. Wenn
+Antworten schlechter oder vergesslicher werden, ist der Chat voll: neu
+anfangen und kurz zusammenfassen, wo du stehst.</li>
+<li><strong>Zeigen statt beschreiben.</strong> Eine Referenz-URL, ein
+Screenshot oder der Code eines Bauteils bringt mehr als drei Absätze
+Beschreibung. Wenn du eine Komponente von einer der Seiten unten willst,
+kopier den Code in den Chat, nenn nicht nur den Namen. Sonst rät der
+Agent, wie sie aussieht.</li>
+<li><strong>Lass dir den Stand zeigen.</strong> "Was steht gerade in der
+Datei?" oder "fass zusammen, was wir geändert haben" kostet nichts und
+verhindert, dass du auf einem falschen Bild weiterarbeitest.</li>
+<li><strong>Bei Fehlern: ganze Fehlermeldung reinkopieren</strong> und
+nach der Ursache fragen, nicht nur nach der Lösung. "Warum passiert
+das?" verhindert, dass der gleiche Fehler zehn Minuten später
+wiederkommt.</li>
+<li><strong>Sichere Zwischenstände.</strong> Kopier die funktionierende
+<code>index.html</code> als <code>index-backup.html</code>, bevor etwas
+Großes umgebaut wird. Ein Satz, zwei Sekunden, rettet dir den
+Nachmittag.</li>
+</ol>
+<p>Alles davon funktioniert genauso mit anderen Agenten. Nichts davon
+ist an Claude Code gebunden.</p>
+<hr />
+<h2 id="4-beispielseiten">4. Beispielseiten</h2>
+<p>Schau sie dir in den ersten Minuten an und entscheide, welche dir am
+nächsten ist. Du kopierst <strong>nicht</strong> das Design, du
+übernimmst die Struktur.</p>
+<table>
+<thead>
+<tr>
+<th>Seite</th>
+<th>Warum sie hier steht</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://mike-lehmann.com">mike-lehmann.com</a></td>
+<td>Klarster Aufbau von allen. Kopf mit Foto und Kundennamen, Projekte
+mit Methoden, Ausbildung, Kontakt. Das realistischste Vorbild für
+heute.</td>
+</tr>
+<tr>
+<td><a
+href="https://www.lisamariemaier.com/about">lisamariemaier.com/about</a></td>
+<td>Beste About-Seite: Intro, Interessen, Ausbildung, Erfahrung als
+Tabelle, Toolkit.</td>
+</tr>
+<tr>
+<td><a href="https://www.marco.fyi/work">marco.fyi/work</a></td>
+<td>Projekte als gestapelte Liste, pro Projekt nur Titel, eine Zeile,
+ein Pfeil zur Unterseite.</td>
+</tr>
+<tr>
+<td><a href="https://mijobello.com">mijobello.com</a></td>
+<td>Mediengetrieben mit Video, Projekte als Karussell mit Tags. Das
+aufwendigste Beispiel.</td>
+</tr>
+<tr>
+<td><a
+href="https://nataliealmosa.ca/skiff">nataliealmosa.ca/skiff</a></td>
+<td>Eine einzelne Case Study. Muster für deine Projektunterseite.</td>
+</tr>
+<tr>
+<td><a
+href="https://max-mertens.com/link.html">max-mertens.com/link.html</a></td>
+<td>Minimale Linkseite. Dein Notausgang, wenn die Zeit knapp wird.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="der-bauplan">Der Bauplan</h3>
+<p>Die sechs Seiten sehen verschieden aus, haben aber fast denselben
+Aufbau. Das ist deine Abschnittsliste:</p>
+<ol type="1">
+<li><strong>Kopf:</strong> Name groß, darunter ein Satz dazu, was du
+machst und wo du gerade bist. Portraitfoto. Optional eine Reihe mit
+Firmen, Hochschulen oder Projekten.</li>
+<li><strong>Selected Work:</strong> drei bis fünf Projekte, nicht alles.
+Pro Projekt Titel, ein Satz, zwei bis vier Stichworte, Link zur
+Unterseite.</li>
+<li><strong>Weitere Projekte:</strong> kürzere Liste ohne Bilder. Titel,
+eine Zeile, Link.</li>
+<li><strong>Case Study je Projekt:</strong> eigene Unterseite mit Cover,
+Rolle, Zeitraum, Problem, Vorgehen, Ergebnis.</li>
+<li><strong>About:</strong> zwei Absätze in der Ich-Form, Ausbildung als
+Liste, Erfahrung als Tabelle mit Firma, Rolle, Zeitraum, am Ende die
+Tools.</li>
+<li><strong>Kontakt:</strong> E-Mail, LinkedIn, GitHub. Kein
+Kontaktformular, das braucht einen Server.</li>
+<li><strong>Fuß:</strong> Jahr und Impressum.</li>
+</ol>
+<p>Wiederkehrende Designmuster: viel Weißraum, wenige Farben, Name und
+Überschriften groß, Navigation klein, kleine Bewegung beim Scrollen und
+Hovern statt großer Effekte.</p>
+<p><strong>Gute Nachricht:</strong> dein Lebenslauf liefert fast alle
+Inhalte. Es fehlen nur ein Satz über dich, drei Projektbeschreibungen
+und ein Foto.</p>
+<h3 id="galerien-wenn-du-mehr-sehen-willst">Galerien, wenn du mehr sehen
+willst</h3>
+<ul>
+<li><a href="https://minimal.gallery">minimal.gallery</a> kuratiert
+minimalistische Seiten, seit 2013. Am nächsten an den Beispielen
+oben.</li>
+<li><a href="https://personalsit.es">personalsit.es</a> Verzeichnis
+echter persönlicher Seiten, kein Agentur-Hochglanz. Realistisches
+Niveau.</li>
+<li><a href="https://www.siteinspire.com">siteinspire.com</a> filterbar
+nach Stil, Typ und Branche.</li>
+<li><a href="https://land-book.com">land-book.com</a> gut für
+Hero-Sektionen und Seitenaufbau.</li>
+<li><a href="https://godly.website">godly.website</a> zeigt Seiten als
+Videovorschau, also ideal für Scroll- und Bewegungsideen.</li>
+<li><a href="https://onepagelove.com">onepagelove.com</a> Einseiter plus
+über 100 Portfolio-Templates mit Demo und Download.</li>
+<li><a href="https://www.awwwards.com">awwwards.com</a>
+Preisträgerseiten. Schön, als Vorbild für heute zu groß.</li>
+</ul>
+<p>Fünf Minuten umsehen, dann entscheiden. Galerien sind eine
+Zeitfalle.</p>
+<hr />
+<h2 id="5-bauteile">5. Bauteile</h2>
+<p>Alles hier ist kostenlos und lässt sich in eine einzelne HTML-Datei
+kopieren, wenn nicht anders vermerkt.</p>
+<h3 id="fertige-seiten-als-startpunkt">Fertige Seiten als
+Startpunkt</h3>
+<ul>
+<li><a href="https://html5up.net">html5up.net</a> rund 50 fertige
+Seiten, nur HTML und CSS. Lizenz CC BY, der Credit muss also sichtbar
+bleiben. "Read Only" und "Twenty" sind klassische
+Portfolio-Einseiter.</li>
+<li><a
+href="https://onepagelove.com/templates/portfolio-templates">onepagelove.com/templates/portfolio-templates</a>
+über 100 Einseiter mit Review, Demo und Download. Achte auf den Hinweis,
+welche Technik nötig ist. Brauchbar sind HTML und Bootstrap.</li>
+<li><a href="https://fffuel.co/tttemplates">fffuel.co/tttemplates</a>
+schlanke HTML-Templates mit modernem CSS.</li>
+</ul>
+<h3 id="abschnitte-und-komponenten">Abschnitte und Komponenten</h3>
+<ul>
+<li><a href="https://www.hyperui.dev">hyperui.dev</a> über 200 freie
+Tailwind-Komponenten, kopieren und einsetzen, kein Setup. Header, Hero,
+Karten, Footer.</li>
+<li><a href="https://flowbite.com">flowbite.com</a> Komponenten plus
+Interaktion, funktioniert in reinem HTML.</li>
+<li><a href="https://preline.co">preline.co</a> rund 300 Komponenten und
+ganze Starter-Seiten.</li>
+<li><a href="https://daisyui.com">daisyui.com</a> Klassennamen wie
+<code>btn</code> und <code>card</code>, kein JavaScript, 35 fertige
+Themes. Läuft auch ohne Installation über CDN.</li>
+<li><a href="https://wickedblocks.dev">wickedblocks.dev</a> und <a
+href="https://flowrift.com">flowrift.com</a> ganze Abschnitte als Blöcke
+mit Ein-Klick-Kopie.</li>
+<li><a href="https://uiverse.io">uiverse.io</a> über 3000 Buttons,
+Karten und Loader aus der Community, als reines CSS oder Tailwind, alles
+MIT.</li>
+</ul>
+<p><strong>Wenn Tailwind ins Spiel kommt:</strong> für eine einzelne
+Datei genügt ein Script-Tag im <code>&lt;head&gt;</code>:
+<code>&lt;script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"&gt;&lt;/script&gt;</code>
+Laut <a
+href="https://tailwindcss.com/docs/installation/play-cdn">Tailwind-Doku</a>
+ist das nur für Entwicklung und Prototypen gedacht, für heute also genau
+richtig.</p>
+<p><strong>Ganz ohne Tailwind:</strong> <a
+href="https://picocss.com">picocss.com</a> oder <a
+href="https://simplecss.org">simplecss.org</a> stylen normales HTML ohne
+eine einzige Klasse. Ein <code>link</code> im <code>head</code>, und die
+Seite sieht sofort ordentlich aus.</p>
+<p><strong>Finger weg (heute):</strong> shadcn/ui, 21st.dev und Magic UI
+tauchen bei jeder Suche oben auf, setzen aber React voraus. In einer
+einzelnen HTML-Datei nutzlos.</p>
+<h3 id="schrift">Schrift</h3>
+<ul>
+<li><a href="https://fonts.google.com">fonts.google.com</a> immer
+lizenzrechtlich unbedenklich.</li>
+<li><a href="https://www.fontshare.com">fontshare.com</a> 100 Familien,
+kostenlos privat und kommerziell, ohne Namensnennung. Daher kommen die
+Schriften, nach denen die Beispielseiten aussehen: Satoshi, Clash
+Display, Cabinet Grotesk.</li>
+</ul>
+<p>Zwei Schriften maximal. Eine reicht meistens.</p>
+<h3 id="icons">Icons</h3>
+<p><a href="https://lucide.dev">Lucide</a>, <a
+href="https://heroicons.com">Heroicons</a>, <a
+href="https://tabler.io/icons">Tabler</a> (über 5000) und <a
+href="https://phosphoricons.com">Phosphor</a> (sechs Strichstärken).
+Alle frei nutzbar. Du kopierst das SVG und setzt es direkt ins HTML. Ein
+Set pro Seite, Mischen sieht sofort unruhig aus.</p>
+<h3 id="bilder">Bilder</h3>
+<ul>
+<li><a href="https://unsplash.com">unsplash.com</a> und <a
+href="https://www.pexels.com">pexels.com</a> kommerziell nutzbar, ohne
+Pflicht zur Nennung.</li>
+<li>Für ein Portfolio schlagen eigene Fotos jedes Stockbild. Ein
+Portraitfoto ist Pflicht, Screenshots deiner Projekte sind mehr wert als
+Symbolbilder.</li>
+</ul>
+<h3 id="hintergründe-und-muster">Hintergründe und Muster</h3>
+<ul>
+<li><a href="https://heropatterns.com">heropatterns.com</a>
+wiederholbare SVG-Muster, Farben einstellen, CSS kopieren.</li>
+<li><a href="https://fffuel.co">fffuel.co</a> große Sammlung freier
+SVG-Generatoren für Verläufe, Körnung, Linien und Punkte.</li>
+<li><a href="https://haikei.app">haikei.app</a> Wellen, Blobs und
+Verläufe als SVG, ohne Anmeldung.</li>
+</ul>
+<h3 id="animation">Animation</h3>
+<ul>
+<li><a href="https://animista.net">animista.net</a> Animation auswählen,
+einstellen, CSS kopieren.</li>
+<li><a href="https://michalsnik.github.io/aos/">AOS</a> Elemente
+erscheinen beim Scrollen, Einbindung per CDN über ein
+<code>data-aos</code> Attribut.</li>
+<li><a href="https://github.com/darkroomengineering/lenis">lenis</a>
+weiches Scrollen, wenige Kilobyte. Der Effekt, der die Beispielseiten
+teuer wirken lässt.</li>
+<li><a href="https://gsap.com">gsap.com</a> für alles Größere. Heute
+eher nicht.</li>
+</ul>
+<p><strong>Ein Effekt pro Seite reicht.</strong> Die Beispielseiten
+wirken nicht wegen vieler Animationen hochwertig, sondern wegen Timing
+und Weißraum.</p>
+<hr />
+<h2 id="6-prompts-zum-kopieren">6. Prompts zum Kopieren</h2>
+<p>Nacheinander in <strong>Session A</strong> (der Coding-Session).
+Ersetze, was in spitzen Klammern steht.</p>
+<p><strong>Schritt 1: Projekt anlegen</strong></p>
+<pre><code>Ich baue meine persönliche Portfolio-Website. Technischer Rahmen: eine einzelne
+index.html mit CSS im head, kein Framework, kein Build-Schritt. Lege die Datei an
+mit einem leeren Grundgerüst, deutschem lang-Attribut, Viewport-Meta und einem
+sinnvollen Titel. Erklär mir in zwei Sätzen, was du angelegt hast.</code></pre>
+<p><strong>Schritt 2: Inhalte einlesen</strong></p>
+<pre><code>Hier ist mein Lebenslauf: &lt;Datei anhängen&gt;. Zieh daraus heraus:
+einen Satz über mich, meine Ausbildung, meine Stationen mit Rolle und Zeitraum,
+und schlage drei bis fünf Projekte vor, die auf die Seite gehören.
+Erfinde nichts. Wenn etwas fehlt, frag mich.</code></pre>
+<p><strong>Schritt 3: Struktur bauen</strong></p>
+<pre><code>Baue die Seite mit diesen Abschnitten, in dieser Reihenfolge:
+Kopf mit Name, einem Satz und Portraitfoto; Selected Work mit drei Projekten
+(Titel, ein Satz, Stichworte, Link); About mit Ausbildung und Erfahrung;
+Kontakt mit E-Mail, LinkedIn und GitHub; Fuß mit Jahr und Impressum.
+Erst die Struktur mit meinen Inhalten, Design kommt später.</code></pre>
+<p><strong>Schritt 4: Referenz übernehmen</strong></p>
+<pre><code>Hier ist eine Referenzseite: &lt;URL&gt;. Übernimm daraus nur Layout und Rhythmus:
+Schriftgrößen, Abstände, wie die Projekte angeordnet sind. Farben und Texte
+bleiben meine. Zeig mir vorher in drei Stichpunkten, was du ändern willst.</code></pre>
+<p><strong>Schritt 5: Bauteil einsetzen</strong></p>
+<pre><code>Das ist der Code einer Projektkarte aus HyperUI: &lt;Code einfügen&gt;.
+Baue daraus meine Projektliste mit drei Karten und meinen Inhalten.
+Ändere nichts am Rest der Seite.</code></pre>
+<p><strong>Schritt 6: Material eintragen</strong></p>
+<pre><code>Schrift: &lt;Name&gt; von Fontshare. Icons: Lucide als Inline-SVG.
+Binde die Schrift ein und ersetze die Platzhalter-Icons.</code></pre>
+<p><strong>Schritt 7: Handy prüfen</strong></p>
+<pre><code>Prüfe die Seite für ein Handy mit 390 Pixel Breite. Nenn mir die drei Stellen,
+die dort nicht funktionieren, und schlag für jede eine Lösung vor,
+bevor du etwas änderst.</code></pre>
+<p><strong>Schritt 8: Lizenzcheck</strong></p>
+<pre><code>Liste alles auf, was auf der Seite nicht von mir ist: Schriften, Icons, Bilder,
+Code-Snippets. Pro Eintrag Quelle, Lizenz und ob eine Namensnennung nötig ist.</code></pre>
+<hr />
+<h2 id="7-live-stellen-mit-github-pages">7. Live stellen mit GitHub
+Pages</h2>
+<p>Kostenlos, dauert zehn Minuten, die URL sieht aus wie
+<code>deinname.github.io/portfolio</code>.</p>
+<ol type="1">
+<li>Account auf <a href="https://github.com">github.com</a> anlegen,
+falls noch keiner da ist.</li>
+<li>Neues <strong>öffentliches</strong> Repository anlegen, Name zum
+Beispiel <code>portfolio</code>.</li>
+<li><code>index.html</code> und den Bilderordner hochladen (Upload files
+reicht, kein Git nötig).</li>
+<li>Im Repository auf <strong>Settings</strong>, links auf
+<strong>Pages</strong>.</li>
+<li>Unter Build and deployment als Source <strong>Deploy from a
+branch</strong> wählen, Branch <code>main</code>, Ordner <code>/</code>
+(root), speichern.</li>
+<li>Ein bis zwei Minuten warten, dann erscheint die URL oben auf
+derselben Seite.</li>
+</ol>
+<p>Offizielle Anleitung: <a
+href="https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site">docs.github.com/en/pages</a></p>
+<p>Wenn die Seite weiß bleibt: Datei heißt wirklich
+<code>index.html</code> (klein geschrieben), liegt im Wurzelverzeichnis,
+und Bildpfade stimmen in Groß- und Kleinschreibung. GitHub ist da
+strenger als dein Laptop.</p>
+<hr />
+<h2 id="8-wenn-etwas-nicht-geht">8. Wenn etwas nicht geht</h2>
+<p>Erst Claude fragen, dann uns. Die ganze Fehlermeldung in
+<strong>Session B</strong> kopieren und nach der Ursache fragen.</p>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Wo du nachschaust</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Installation oder Login klappt nicht</td>
+<td><a
+href="https://code.claude.com/docs/de/troubleshoot-install">Installation
+und Login</a></td>
+</tr>
+<tr>
+<td><code>claude: command not found</code></td>
+<td>derselbe Link, Abschnitt zu PATH</td>
+</tr>
+<tr>
+<td>Lieber ohne Terminal arbeiten</td>
+<td><a
+href="https://code.claude.com/docs/de/desktop-quickstart">Desktop-App
+Schnellstart</a></td>
+</tr>
+<tr>
+<td>Erste Schritte im Terminal</td>
+<td><a
+href="https://code.claude.com/docs/de/quickstart">Schnellstart</a></td>
+</tr>
+<tr>
+<td>Agent wird langsam, vergesslich, hängt</td>
+<td><a
+href="https://code.claude.com/docs/de/troubleshooting">Fehlerbehebung</a></td>
+</tr>
+<tr>
+<td>Chat ist voll, wie weitermachen</td>
+<td><a href="https://code.claude.com/docs/de/sessions">Sitzungen
+verwalten</a></td>
+</tr>
+<tr>
+<td>Agent soll Projektregeln dauerhaft kennen</td>
+<td><a href="https://code.claude.com/docs/de/memory">Projektgedächtnis,
+CLAUDE.md</a></td>
+</tr>
+<tr>
+<td>Welche Befehle gibt es</td>
+<td><a href="https://code.claude.com/docs/de/commands">Befehle</a></td>
+</tr>
+<tr>
+<td>Konkrete Fehlermeldung nachschlagen</td>
+<td><a
+href="https://code.claude.com/docs/de/errors">Fehlerreferenz</a></td>
+</tr>
+</tbody>
+</table>
+<p>Typische Situationen, die kein Bug sind:</p>
+<ul>
+<li><strong>Der Agent ändert die falsche Datei.</strong> Du bist im
+falschen Ordner. Lass dir den Pfad zeigen.</li>
+<li><strong>Die Seite sieht nach dem Neuladen unverändert aus.</strong>
+Harter Reload mit Cmd+Shift+R oder Strg+F5.</li>
+<li><strong>Nach einer großen Änderung ist alles kaputt.</strong> Backup
+zurückkopieren, dann in kleineren Schritten nochmal.</li>
+<li><strong>Der Agent behauptet, etwas sei fertig, ist es aber
+nicht.</strong> Im Browser prüfen, nicht im Chat. Immer.</li>
+</ul>
+<hr />
+<h2 id="9-checkliste-bevor-du-die-seite-teilst">9. Checkliste, bevor du
+die Seite teilst</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Name, ein Satz über dich,
+Portraitfoto sind drin</label></li>
+<li><label><input type="checkbox" />Drei Projekte mit je einem
+verständlichen Satz</label></li>
+<li><label><input type="checkbox" />E-Mail, LinkedIn und GitHub
+funktionieren beim Anklicken</label></li>
+<li><label><input type="checkbox" />Seitentitel im Browser-Tab ist nicht
+"Document"</label></li>
+<li><label><input type="checkbox" />Auf dem Handy lesbar, nichts läuft
+über den Rand</label></li>
+<li><label><input type="checkbox" />Impressum mit Name und Adresse (in
+Deutschland Pflicht)</label></li>
+<li><label><input type="checkbox" />Fremde Schriften, Icons und Bilder
+sind geklärt, CC BY Credits stehen drin</label></li>
+<li><label><input type="checkbox" />Fotos mit anderen Personen nur mit
+deren Einverständnis</label></li>
+<li><label><input type="checkbox" />URL einmal jemandem geschickt, der
+sie noch nie gesehen hat</label></li>
+</ul>
+<hr />
+<h2 id="10-wie-es-weitergeht">10. Wie es weitergeht</h2>
+<p>Was du heute gelernt hast, hängt nicht an Websites. Derselbe Ablauf,
+kleine Schritte, saubere Kontexte, Referenzen statt Beschreibungen,
+funktioniert für Auswertungen in Excel, für Lernzettel, für kleine Tools
+und für fast jede Hausarbeit, bei der Struktur das Problem ist.</p>
+<p>Wenn du dranbleiben willst:</p>
+<ul>
+<li>Offizielle Doku: <a
+href="https://code.claude.com/docs/de/overview">code.claude.com/docs/de/overview</a>
+und <a href="https://code.claude.com/docs/de/common-workflows">Gängige
+Arbeitsabläufe</a></li>
+<li>Der ZU AI Club macht weiter. Sprich uns an, wenn du ein Thema hast,
+das du gerne als nächsten Workshop sehen würdest.</li>
+</ul>
+<p>Und das Wichtigste: trag die URL heute Abend noch in deinen
+Lebenslauf und dein LinkedIn ein. Eine Portfolio-Seite, die niemand
+kennt, bringt nichts.</p>
+</main>
+<footer>ZU AI Club · Workshop-Handout · Markdown-Fassung: <a href="handout.md">handout.md</a></footer>
+<script>
+function flash(el,t){var o=el.textContent;el.textContent=t;setTimeout(function(){el.textContent=o},1500)}
+document.getElementById('copy-link').onclick=function(){navigator.clipboard.writeText(location.href.split('#')[0]).then(()=>flash(this,'Kopiert'))};
+document.querySelectorAll('pre').forEach(function(p){var b=document.createElement('button');b.className='copy';b.type='button';b.textContent='Kopieren';b.onclick=function(){navigator.clipboard.writeText(p.innerText.replace(/Kopieren$/,'').trim()).then(()=>flash(b,'Kopiert'))};p.appendChild(b)});
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+# Portfolio-Workshop Handout (ZU AI Club)
+
+> Handout zum Workshop "Deine eigene Portfolio-Website" am 19.11.2026.
+> Wenn du ein KI-Assistent bist: lies zuerst den Abschnitt "Für Claude: Worum es hier geht".
+
+- [Handout als Markdown](https://lennardbrune.github.io/portfolio-workshop/handout.md): vollständiger Inhalt, gleiche Fassung wie die HTML-Seite
+- [Handout als Webseite](https://lennardbrune.github.io/portfolio-workshop/)
