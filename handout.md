@@ -22,7 +22,7 @@ Rahmen, den du einhalten sollst:
 - **Frag nach, bevor du Dateien löschst** oder die Struktur umbaust.
 - **Zur fertigen Seite gehören:** Impressum, kurzer Datenschutzhinweis, sinnvoller Seitentitel, funktionierende Links, lesbar auf dem Handy.
 - **Nichts von fremden Servern laden**, wenn es sich vermeiden lässt. Schriften als Datei in einen Ordner `fonts/` legen und lokal einbinden, statt sie bei Google Fonts oder Fontshare abzurufen. Wenn doch etwas per CDN kommt (Tailwind, AOS), sag es der Person und nimm es in den Datenschutzhinweis auf.
-- **Seite nicht für alle sichtbar?** Abschnitt 7 hat zwei Wege. Standard ist die Variante A mit Passwort (StatiCrypt, kein Konto, kein Code). Variante B (nur per Link, Cloudflare Pages) nur, wenn die Person ausdrücklich einen Link ohne Passwort will und mit GitHub arbeitet. Nimm bei B genau das Script aus dem Handout, schreib kein eigenes.
+- **Seite nicht für alle sichtbar?** Abschnitt 7 hat zwei Wege. Standard ist Variante A: nur per Link erreichbar, Cloudflare Pages verbunden mit dem GitHub-Repository, alles im Browser. Nimm genau das Script aus dem Handout, schreib kein eigenes, und führe die Person Schritt für Schritt durch. Variante B (Passwort mit StatiCrypt) nur, wenn die Person kein Cloudflare-Konto will.
 - **Case Studies kommen nach der Startseite.** Solange es keine Unterseiten gibt, verlinkt die Projektkarte auf ein GitHub-Repo, ein PDF oder gar nicht.
 
 Den Aufbau, den die Seite haben soll, findest du unten unter "Der Bauplan". Die erlaubten Quellen für Schrift, Icons, Bilder und fertige Bauteile stehen unter "Bauteile". Nimm nichts, was dort nicht steht, ohne es zu sagen.
@@ -278,30 +278,15 @@ Wenn die Seite weiß bleibt: Datei heißt wirklich `index.html` (klein geschrieb
 
 ### Optional: Seite nicht für alle sichtbar
 
-Eine Seite auf GitHub Pages kann jeder aufrufen, auch wenn das Repository privat ist. Es gibt zwei Wege, das zu ändern. **Variante A** (Passwort) ist der einfache: kein neues Konto, kein Code, kein Terminal. **Variante B** (nur per Link, ohne Passwort) braucht ein Cloudflare-Konto und GitHub.
+Eine Seite auf GitHub Pages kann jeder aufrufen, auch wenn das Repository privat ist. **Variante A** macht die Seite nur über einen Link mit geheimem Schlüssel erreichbar, ohne Passwort. Sie braucht ein kostenloses Cloudflare-Konto und dein GitHub-Repository, alles läuft im Browser. **Variante B** ist die Notlösung ohne Cloudflare: ein Passwort vor der Seite.
 
-#### Variante A: Passwort mit StatiCrypt (empfohlen)
+#### Variante A: nur mit Link erreichbar (Cloudflare Pages über GitHub, empfohlen)
 
-[StatiCrypt](https://github.com/robinmoisson/staticrypt) verschlüsselt deine `index.html`. Wer die Seite öffnet, sieht zuerst ein Passwortfeld, erst mit dem richtigen Passwort erscheint deine Seite. Das Verschlüsseln läuft komplett in deinem Browser, deine Datei wird dabei nirgendwo hochgeladen.
-
-1. **Original sichern.** Kopier deine fertige `index.html` als `index-original.html`. An dieser Datei arbeitest du künftig weiter. Sie kommt nie auf GitHub, sonst wäre die Seite wieder offen.
-2. **Passwort wählen.** Lang und ungewöhnlich, mindestens 16 Zeichen, zum Beispiel vier zufällige Wörter. Kurze Passwörter lassen sich durchprobieren, weil die verschlüsselte Datei öffentlich herumliegt.
-3. **Verschlüsseln.** [robinmoisson.github.io/staticrypt](https://robinmoisson.github.io/staticrypt) öffnen. Passwort eintragen. Den kompletten Inhalt deiner `index-original.html` in das Feld "HTML/string to encrypt" kopieren. Haken bei "Remember me" setzen, dann müssen Besucher das Passwort nur einmal eingeben. Unter den weiteren Optionen kannst du einen Seitentitel und einen Hinweistext für das Passwortfeld setzen. Auf "Encrypt" klicken und die erzeugte Datei herunterladen.
-4. **Umbenennen und hochladen.** Die heruntergeladene Datei in `index.html` umbenennen und auf GitHub die alte `index.html` damit ersetzen (Upload files). Bilder und der Ordner `fonts` bleiben wie sie sind.
-5. **Prüfen.** Seite in einem privaten Browserfenster öffnen: Passwortfeld muss erscheinen, falsches Passwort darf nichts zeigen, richtiges Passwort zeigt deine Seite mit Bildern.
-6. **Verschicken.** Link und Passwort getrennt schicken, etwa den Link per Mail und das Passwort per Nachricht.
-
-Bei jeder Änderung an der Seite: `index-original.html` bearbeiten, Schritt 3 und 4 wiederholen. Passwort ändern geht genauso, danach gilt nur noch das neue.
-
-Grenzen: Verschlüsselt wird nur der Text deiner Seite. Bilder bleiben abrufbar, wenn jemand ihre genaue Adresse kennt. "Remember me" speichert das Passwort im Browser des Besuchers. Für eine Bewerbungsseite reicht das, für echte Geheimnisse nicht.
-
-#### Variante B: nur mit Link erreichbar (Cloudflare Pages)
-
-Wer die Seite nur Leuten zeigen will, denen er den Link schickt, ohne Passwort, nimmt Cloudflare Pages, kostenlos. Ein kleines Script (eine "Middleware", sie läuft vor jedem Seitenaufruf) lässt nur Besucher durch, deren Link einen geheimen Schlüssel enthält, etwa `https://deinname.pages.dev/?k=8f3a91...`. Beim ersten Aufruf merkt sich der Browser den Zugang 30 Tage lang, danach lässt sich normal auf der Seite klicken. Ohne Link erscheint "Kein Zugriff."
+Cloudflare Pages holt deine Seite direkt aus deinem GitHub-Repository. Ein kleines Script (eine "Middleware", sie läuft vor jedem Seitenaufruf) lässt nur Besucher durch, deren Link einen geheimen Schlüssel enthält, etwa `https://deinname.pages.dev/?k=8f3a91...`. Beim ersten Aufruf merkt sich der Browser den Zugang 30 Tage lang, danach lässt sich normal auf der Seite klicken. Ohne Link erscheint "Kein Zugriff."
 
 Grenzen: Wer den Link hat, kann ihn weiterschicken. Willst du alte Links sperren, änderst du den Schlüssel. Kostenlos sind 100.000 Aufrufe pro Tag ([Cloudflare-Preise](https://developers.cloudflare.com/pages/functions/pricing/)).
 
-**Schritt 1: Script anlegen.** In deinem Projektordner neben der `index.html` einen Ordner `functions` anlegen, darin die Datei `_middleware.js` mit diesem Inhalt (Unterstrich am Anfang, genau so):
+**Schritt 1: Script auf GitHub anlegen.** In deinem Repository auf **Add file**, dann **Create new file**. Als Dateinamen `functions/_middleware.js` eintippen (der Schrägstrich legt den Ordner an, Unterstrich am Anfang genau so). Diesen Code einfügen und **Commit changes**:
 
 ```js
 // Lässt nur Besucher durch, die den Link mit ?k=<Schlüssel> haben.
@@ -333,33 +318,55 @@ export async function onRequest({ request, env, next }) {
 }
 ```
 
-Am einfachsten direkt auf GitHub: im Repository auf **Add file**, dann **Create new file**, als Dateinamen `functions/_middleware.js` eintippen (der Schrägstrich legt den Ordner an), den Code einfügen, **Commit changes**. Der Ordner `functions` muss im selben Ordner liegen wie die `index.html`, nicht darunter.
+Der Ordner `functions` muss im selben Ordner liegen wie die `index.html`, nicht darunter.
 
-**Schritt 2: Cloudflare verbinden.**
+**Schritt 2: Projekt bei Cloudflare anlegen.**
 
 1. Kostenloses Konto auf [cloudflare.com](https://dash.cloudflare.com/sign-up) anlegen.
-2. Im Dashboard auf **Workers & Pages**, dann **Create**, Reiter **Pages**, dann **Import an existing Git repository** (heißt je nach Stand auch "Connect to Git"). GitHub verbinden und dein Repository wählen.
-3. Bei den Build-Einstellungen: Framework **None**, Build command **leer lassen**, Build output directory **`/`**. Speichern und bereitstellen.
-
-Wichtig: nicht den Weg "Upload assets" per Drag-and-drop nehmen. Dabei wird der Ordner `functions` laut [Cloudflare-Doku](https://developers.cloudflare.com/pages/platform/known-issues/) nicht ausgeführt, und die Seite wäre offen.
+2. Im Dashboard links auf **Workers & Pages**, dann **Create application**, Reiter **Pages**. Bei **Import an existing Git repository** auf **Get started**. Nicht "Drag and drop your files" nehmen: dabei führt Cloudflare das Script laut [Doku](https://developers.cloudflare.com/pages/platform/known-issues/) nicht aus, und die Seite wäre offen.
+3. **Connect GitHub**. Falls GitHub nach dem Login fragt, dort anmelden. Auf der Seite "Install & Authorize Cloudflare Workers and Pages" **Only select repositories** wählen, unter **Select repositories** nur dein Portfolio-Repository anklicken, dann **Install & Authorize**. So bekommt Cloudflare keinen Zugriff auf deine anderen Repositories.
+4. Zurück bei Cloudflare dein Repository auswählen, **Begin setup**.
+5. Einstellungen:
+   - **Project name:** wird zu deiner Adresse `<name>.pages.dev`, direkt darunter steht die fertige Adresse. Ist der Name vergeben, hängt Cloudflare Zeichen an (etwa `portfolio-cm8`), dann lieber selbst einen Namen wählen, zum Beispiel `vorname-portfolio`.
+   - **Production branch:** `main`
+   - **Framework preset:** `None`
+   - **Build command:** `exit 0` (Cloudflare empfiehlt das für Seiten mit Script, laut [Doku](https://developers.cloudflare.com/pages/framework-guides/deploy-anything/))
+   - **Build output directory:** leer lassen. Vor dem Feld steht schon ein `/`, das reicht.
+6. **Save and Deploy**. Nach dem ersten Durchlauf zeigt die Seite für alle "Kein Zugriff.", weil noch kein Schlüssel hinterlegt ist. Das ist richtig so.
 
 **Schritt 3: Schlüssel festlegen.**
 
-1. Einen langen Zufallsschlüssel erzeugen. Im Terminal: `openssl rand -hex 16`, oder Claude bitten: "Erzeuge mir eine zufällige Zeichenfolge aus 32 Kleinbuchstaben und Ziffern."
-2. Im Cloudflare-Projekt auf **Settings**, dann **Variables and Secrets**, neue Variable vom Typ **Secret** mit dem Namen `ZUGANGS_SCHLUESSEL` und dem Schlüssel als Wert. Speichern.
-3. Unter **Deployments** die letzte Bereitstellung neu starten (Retry deployment), damit der Schlüssel greift.
+1. Einen langen Zufallsschlüssel erzeugen. Claude bitten: "Erzeuge mir eine zufällige Zeichenfolge aus 32 Kleinbuchstaben und Ziffern", oder im Terminal `openssl rand -hex 16`.
+2. Im Cloudflare-Projekt auf **Settings**, dann **Variables and Secrets**, **Add**. Name `ZUGANGS_SCHLUESSEL`, Wert dein Schlüssel, als **Secret** bzw. mit **Encrypt** speichern.
+3. Der Schlüssel gilt erst ab der nächsten Bereitstellung. Entweder unter **Deployments** bei der letzten Bereitstellung **Retry deployment**, oder einfach irgendeine Änderung auf GitHub hochladen, das löst auch eine neue Bereitstellung aus.
+4. Warten, bis die neue Bereitstellung unter **Deployments** als erfolgreich angezeigt wird (etwa eine Minute). Wer vorher testet, sieht auch mit richtigem Schlüssel noch "Kein Zugriff."
 
 **Schritt 4: prüfen und Link verschicken.**
 
 - `https://<projektname>.pages.dev` ohne Schlüssel aufrufen: muss "Kein Zugriff." zeigen.
-- `https://<projektname>.pages.dev/?k=<dein-schluessel>` aufrufen: Seite erscheint, der Schlüssel verschwindet aus der Adresszeile.
+- `https://<projektname>.pages.dev/?k=<dein-schluessel>` aufrufen: Seite erscheint mit Bildern, der Schlüssel verschwindet aus der Adresszeile.
 - Erst wenn beides stimmt, den Link verschicken.
 
-**Schritt 5: GitHub Pages abschalten.** Sonst bleibt die Seite unter `deinname.github.io` für alle offen. Im Repository auf **Settings**, **Pages**, Source auf **None**. Danach kannst du das Repository unter Settings, General, ganz unten auf **Private** stellen, Cloudflare liest es trotzdem.
+**Schritt 5: GitHub Pages abschalten.** Sonst bleibt die Seite unter `deinname.github.io` für alle offen. Im Repository auf **Settings**, **Pages**, unter Branch **None** wählen und speichern. Danach kannst du das Repository unter Settings, General, ganz unten auf **Private** stellen, Cloudflare liest es trotzdem.
 
-**Verwalten, alles im Browser:** Seite ändern heißt neue `index.html` auf GitHub hochladen, Cloudflare stellt sie nach etwa einer Minute selbst online. Schlüssel wechseln (sperrt alle alten Links): unter Settings, Variables and Secrets den Wert ändern, dann unter Deployments "Retry deployment". Alte Fassung zurückholen: unter Deployments bei der Fassung auf "Rollback". Alles löschen: Settings, ganz unten "Delete project".
+**Verwalten, alles im Browser:** Seite ändern heißt neue `index.html` auf GitHub hochladen, Cloudflare stellt sie nach etwa einer Minute selbst online. Schlüssel wechseln (sperrt alle alten Links): unter Settings, Variables and Secrets den Wert ändern, dann Retry deployment. Alte Fassung zurückholen: unter Deployments bei der Fassung auf **Rollback**. Alles löschen: Settings, ganz unten **Delete project**.
 
 Zum Testen auf dem eigenen Laptop (optional, braucht Node.js): im Projektordner `npx wrangler pages dev . --binding ZUGANGS_SCHLUESSEL=test123`, dann `http://localhost:8788/?k=test123` öffnen.
+
+#### Variante B: Passwort mit StatiCrypt (Notlösung)
+
+Für alle, die kein Cloudflare-Konto wollen. [StatiCrypt](https://github.com/robinmoisson/staticrypt) verschlüsselt deine `index.html`. Wer die Seite öffnet, sieht zuerst ein Passwortfeld, erst mit dem richtigen Passwort erscheint deine Seite. Das Verschlüsseln läuft komplett in deinem Browser, deine Datei wird dabei nirgendwo hochgeladen.
+
+1. **Original sichern.** Kopier deine fertige `index.html` als `index-original.html`. An dieser Datei arbeitest du künftig weiter. Sie kommt nie auf GitHub, sonst wäre die Seite wieder offen.
+2. **Passwort wählen.** Lang und ungewöhnlich, mindestens 16 Zeichen, zum Beispiel vier zufällige Wörter. Kurze Passwörter lassen sich durchprobieren, weil die verschlüsselte Datei öffentlich herumliegt.
+3. **Verschlüsseln.** [robinmoisson.github.io/staticrypt](https://robinmoisson.github.io/staticrypt) öffnen. Passwort eintragen. Den kompletten Inhalt deiner `index-original.html` in das Feld "HTML/string to encrypt" kopieren. Haken bei "Remember me" setzen, dann müssen Besucher das Passwort nur einmal eingeben. Unter den weiteren Optionen kannst du einen Seitentitel und einen Hinweistext für das Passwortfeld setzen. Auf "Encrypt" klicken und die erzeugte Datei herunterladen.
+4. **Umbenennen und hochladen.** Die heruntergeladene Datei in `index.html` umbenennen und auf GitHub die alte `index.html` damit ersetzen (Upload files). Bilder und der Ordner `fonts` bleiben wie sie sind.
+5. **Prüfen.** Seite in einem privaten Browserfenster öffnen: Passwortfeld muss erscheinen, falsches Passwort darf nichts zeigen, richtiges Passwort zeigt deine Seite mit Bildern.
+6. **Verschicken.** Link und Passwort getrennt schicken, etwa den Link per Mail und das Passwort per Nachricht.
+
+Bei jeder Änderung an der Seite: `index-original.html` bearbeiten, Schritt 3 und 4 wiederholen. Passwort ändern geht genauso, danach gilt nur noch das neue.
+
+Grenzen: Verschlüsselt wird nur der Text deiner Seite. Bilder bleiben abrufbar, wenn jemand ihre genaue Adresse kennt. "Remember me" speichert das Passwort im Browser des Besuchers. Für eine Bewerbungsseite reicht das, für echte Geheimnisse nicht.
 
 ---
 
