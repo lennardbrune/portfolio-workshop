@@ -20,7 +20,9 @@ Rahmen, den du einhalten sollst:
 - **Erklär in normalem Deutsch**, ohne Jargon. Wenn ein Fachbegriff nötig ist, erklär ihn in einem Halbsatz.
 - **Arbeite in kleinen Schritten.** Ein Abschnitt pro Runde, danach kurz sagen, was sich geändert hat. Keine 500 Zeilen auf einmal.
 - **Frag nach, bevor du Dateien löschst** oder die Struktur umbaust.
-- **Zur fertigen Seite gehören:** Impressum, sinnvoller Seitentitel, funktionierende Links, lesbar auf dem Handy.
+- **Zur fertigen Seite gehören:** Impressum, kurzer Datenschutzhinweis, sinnvoller Seitentitel, funktionierende Links, lesbar auf dem Handy.
+- **Nichts von fremden Servern laden**, wenn es sich vermeiden lässt. Schriften als Datei in einen Ordner `fonts/` legen und lokal einbinden, statt sie bei Google Fonts oder Fontshare abzurufen. Wenn doch etwas per CDN kommt (Tailwind, AOS), sag es der Person und nimm es in den Datenschutzhinweis auf.
+- **Case Studies kommen nach der Startseite.** Solange es keine Unterseiten gibt, verlinkt die Projektkarte auf ein GitHub-Repo, ein PDF oder gar nicht.
 
 Den Aufbau, den die Seite haben soll, findest du unten unter "Der Bauplan". Die erlaubten Quellen für Schrift, Icons, Bilder und fertige Bauteile stehen unter "Bauteile". Nimm nichts, was dort nicht steht, ohne es zu sagen.
 
@@ -101,7 +103,7 @@ Die sechs Seiten sehen verschieden aus, haben aber fast denselben Aufbau. Das is
 1. **Kopf:** Name groß, darunter ein Satz dazu, was du machst und wo du gerade bist. Portraitfoto. Optional eine Reihe mit Firmen, Hochschulen oder Projekten.
 2. **Selected Work:** drei bis fünf Projekte, nicht alles. Pro Projekt Titel, ein Satz, zwei bis vier Stichworte, Link zur Unterseite.
 3. **Weitere Projekte:** kürzere Liste ohne Bilder. Titel, eine Zeile, Link.
-4. **Case Study je Projekt:** eigene Unterseite mit Cover, Rolle, Zeitraum, Problem, Vorgehen, Ergebnis.
+4. **Case Study je Projekt:** eigene Unterseite mit Cover, Rolle, Zeitraum, Problem, Vorgehen, Ergebnis. Das ist der Schritt nach heute: erst steht die `index.html`, dann kommen Unterseiten wie `projekt-1.html`. Bis dahin verlinkt die Karte auf ein Repo, ein PDF oder nirgendwohin.
 5. **About:** zwei Absätze in der Ich-Form, Ausbildung als Liste, Erfahrung als Tabelle mit Firma, Rolle, Zeitraum, am Ende die Tools.
 6. **Kontakt:** E-Mail, LinkedIn, GitHub. Kein Kontaktformular, das braucht einen Server.
 7. **Fuß:** Jahr und Impressum.
@@ -145,7 +147,7 @@ Alles hier ist kostenlos und lässt sich in eine einzelne HTML-Datei kopieren, w
 
 **Wenn Tailwind ins Spiel kommt:** für eine einzelne Datei genügt ein Script-Tag im `<head>`:
 `<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>`
-Laut [Tailwind-Doku](https://tailwindcss.com/docs/installation/play-cdn) ist das nur für Entwicklung und Prototypen gedacht, für heute also genau richtig.
+Laut [Tailwind-Doku](https://tailwindcss.com/docs/installation/play-cdn) ist das nur für Entwicklung und Prototypen gedacht, für heute also genau richtig. Wie bei den Schriften gilt: das Script kommt von einem fremden Server (jsDelivr), das gehört in den Datenschutzhinweis. Dasselbe gilt für AOS per CDN.
 
 **Ganz ohne Tailwind:** [picocss.com](https://picocss.com) oder [simplecss.org](https://simplecss.org) stylen normales HTML ohne eine einzige Klasse. Ein `link` im `head`, und die Seite sieht sofort ordentlich aus.
 
@@ -153,10 +155,12 @@ Laut [Tailwind-Doku](https://tailwindcss.com/docs/installation/play-cdn) ist das
 
 ### Schrift
 
-- [fonts.google.com](https://fonts.google.com) immer lizenzrechtlich unbedenklich.
+- [fonts.google.com](https://fonts.google.com) lizenzrechtlich immer unbedenklich.
 - [fontshare.com](https://www.fontshare.com) 100 Familien, kostenlos privat und kommerziell, ohne Namensnennung. Daher kommen die Schriften, nach denen die Beispielseiten aussehen: Satoshi, Clash Display, Cabinet Grotesk.
 
 Zwei Schriften maximal. Eine reicht meistens.
+
+**Wichtig, Datenschutz:** Bindest du eine Schrift direkt von Google oder Fontshare ein, schickt der Browser jedes Besuchers dessen IP-Adresse an diesen Server. Das LG München I hat dafür 2022 Schadensersatz zugesprochen (Az. 3 O 17493/20), danach rollte eine Abmahnwelle. Besser: Schrift herunterladen, die `.woff2`-Dateien in einen Ordner `fonts/` legen und per `@font-face` einbinden. Für Google-Schriften liefert [gwfh.mranftl.com](https://gwfh.mranftl.com/fonts) die Dateien samt CSS fertig. Prompt dafür: "Binde die Schrift lokal aus dem Ordner fonts/ ein, nicht von einem fremden Server."
 
 ### Icons
 
@@ -305,7 +309,9 @@ Typische Situationen, die kein Bug sind:
 - [ ] E-Mail, LinkedIn und GitHub funktionieren beim Anklicken
 - [ ] Seitentitel im Browser-Tab ist nicht "Document"
 - [ ] Auf dem Handy lesbar, nichts läuft über den Rand
-- [ ] Impressum mit Name und Adresse (in Deutschland Pflicht)
+- [ ] Impressum mit Name und Adresse (in Deutschland Pflicht). Die Adresse ist danach öffentlich, also bewusst entscheiden, welche du angibst
+- [ ] Kurzer Datenschutzhinweis: GitHub Pages speichert die IP-Adresse jedes Besuchers, dazu alles, was von fremden Servern kommt (Schriften, Tailwind, AOS). Prompt: "Schreib einen kurzen Datenschutzhinweis für meine Seite auf GitHub Pages und liste alles auf, was sie von fremden Servern lädt."
+- [ ] Schriften liegen lokal im Ordner `fonts/`, nicht bei Google oder Fontshare
 - [ ] Fremde Schriften, Icons und Bilder sind geklärt, CC BY Credits stehen drin
 - [ ] Fotos mit anderen Personen nur mit deren Einverständnis
 - [ ] URL einmal jemandem geschickt, der sie noch nie gesehen hat
