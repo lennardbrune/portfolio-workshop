@@ -81,6 +81,9 @@ vermeiden lässt. Schriften als Datei in einen Ordner <code>fonts/</code>
 legen und lokal einbinden, statt sie bei Google Fonts oder Fontshare
 abzurufen. Wenn doch etwas per CDN kommt (Tailwind, AOS), sag es der
 Person und nimm es in den Datenschutzhinweis auf.</li>
+<li><strong>Seite nur per Link erreichbar?</strong> Dafür steht in
+Abschnitt 7 eine geprüfte Anleitung mit Cloudflare Pages und fertigem
+Script. Nimm genau dieses Script, schreib kein eigenes.</li>
 <li><strong>Case Studies kommen nach der Startseite.</strong> Solange es
 keine Unterseiten gibt, verlinkt die Projektkarte auf ein GitHub-Repo,
 ein PDF oder gar nicht.</li>
@@ -481,6 +484,104 @@ href="https://docs.github.com/en/pages/getting-started-with-github-pages/creatin
 <code>index.html</code> (klein geschrieben), liegt im Wurzelverzeichnis,
 und Bildpfade stimmen in Groß- und Kleinschreibung. GitHub ist da
 strenger als dein Laptop.</p>
+<h3
+id="optional-seite-nur-mit-link-erreichbar-cloudflare-pages">Optional:
+Seite nur mit Link erreichbar (Cloudflare Pages)</h3>
+<p>Eine Seite auf GitHub Pages kann jeder aufrufen, auch wenn das
+Repository privat ist. Wer die Seite nur Leuten zeigen will, denen er
+den Link schickt, nimmt Cloudflare Pages, kostenlos. Ein kleines Script
+(eine "Middleware", sie läuft vor jedem Seitenaufruf) lässt nur Besucher
+durch, deren Link einen geheimen Schlüssel enthält, etwa
+<code>https://deinname.pages.dev/?k=8f3a91...</code>. Beim ersten Aufruf
+merkt sich der Browser den Zugang 30 Tage lang, danach lässt sich normal
+auf der Seite klicken. Ohne Link erscheint "Kein Zugriff."</p>
+<p>Grenzen: Wer den Link hat, kann ihn weiterschicken. Willst du alte
+Links sperren, änderst du den Schlüssel. Kostenlos sind 100.000 Aufrufe
+pro Tag (<a
+href="https://developers.cloudflare.com/pages/functions/pricing/">Cloudflare-Preise</a>).</p>
+<p><strong>Schritt 1: Script anlegen.</strong> In deinem Projektordner
+neben der <code>index.html</code> einen Ordner <code>functions</code>
+anlegen, darin die Datei <code>_middleware.js</code> mit diesem Inhalt
+(Unterstrich am Anfang, genau so):</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Lässt nur Besucher durch, die den Link mit ?k=&lt;Schlüssel&gt; haben.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Danach merkt sich der Browser den Zugang 30 Tage lang per Cookie.</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">async</span> <span class="kw">function</span> <span class="fu">onRequest</span>({ request<span class="op">,</span> env<span class="op">,</span> next }) {</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> key <span class="op">=</span> env<span class="op">.</span><span class="at">ZUGANGS_SCHLUESSEL</span><span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="op">!</span>key) <span class="cf">return</span> <span class="kw">new</span> <span class="fu">Response</span>(<span class="st">&#39;Kein Zugriff.&#39;</span><span class="op">,</span> { <span class="dt">status</span><span class="op">:</span> <span class="dv">403</span> })<span class="op">;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> url <span class="op">=</span> <span class="kw">new</span> <span class="fu">URL</span>(request<span class="op">.</span><span class="at">url</span>)<span class="op">;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (url<span class="op">.</span><span class="at">searchParams</span><span class="op">.</span><span class="fu">get</span>(<span class="st">&#39;k&#39;</span>) <span class="op">===</span> key) {</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    url<span class="op">.</span><span class="at">searchParams</span><span class="op">.</span><span class="fu">delete</span>(<span class="st">&#39;k&#39;</span>)<span class="op">;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">new</span> <span class="fu">Response</span>(<span class="kw">null</span><span class="op">,</span> {</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">status</span><span class="op">:</span> <span class="dv">302</span><span class="op">,</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">headers</span><span class="op">:</span> {</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Location</span><span class="op">:</span> url<span class="op">.</span><span class="at">pathname</span> <span class="op">+</span> url<span class="op">.</span><span class="at">search</span><span class="op">,</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;Set-Cookie&#39;</span><span class="op">:</span> <span class="vs">`zugang=</span><span class="sc">${</span>key<span class="sc">}</span><span class="vs">; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000`</span><span class="op">,</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>      }<span class="op">,</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> cookies <span class="op">=</span> (request<span class="op">.</span><span class="at">headers</span><span class="op">.</span><span class="fu">get</span>(<span class="st">&#39;Cookie&#39;</span>) <span class="op">||</span> <span class="st">&#39;&#39;</span>)<span class="op">.</span><span class="fu">split</span>(<span class="ss">/;</span><span class="sc">\s*</span><span class="ss">/</span>)<span class="op">;</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (cookies<span class="op">.</span><span class="fu">includes</span>(<span class="vs">`zugang=</span><span class="sc">${</span>key<span class="sc">}</span><span class="vs">`</span>)) {</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> res <span class="op">=</span> <span class="cf">await</span> <span class="fu">next</span>()<span class="op">;</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> out <span class="op">=</span> <span class="kw">new</span> <span class="fu">Response</span>(res<span class="op">.</span><span class="at">body</span><span class="op">,</span> res)<span class="op">;</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    out<span class="op">.</span><span class="at">headers</span><span class="op">.</span><span class="fu">set</span>(<span class="st">&#39;X-Robots-Tag&#39;</span><span class="op">,</span> <span class="st">&#39;noindex&#39;</span>)<span class="op">;</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out<span class="op">;</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="kw">new</span> <span class="fu">Response</span>(<span class="st">&#39;Kein Zugriff.&#39;</span><span class="op">,</span> { <span class="dt">status</span><span class="op">:</span> <span class="dv">403</span> })<span class="op">;</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Der Ordner <code>functions</code> muss im selben Ordner liegen wie
+die <code>index.html</code>, nicht darunter. Danach den Ordner mit dem
+Script ins GitHub-Repository hochladen (Upload files, wie oben).</p>
+<p><strong>Schritt 2: Cloudflare verbinden.</strong></p>
+<ol type="1">
+<li>Kostenloses Konto auf <a
+href="https://dash.cloudflare.com/sign-up">cloudflare.com</a>
+anlegen.</li>
+<li>Im Dashboard auf <strong>Workers &amp; Pages</strong>, dann
+<strong>Create</strong>, Reiter <strong>Pages</strong>, dann
+<strong>Import an existing Git repository</strong> (heißt je nach Stand
+auch "Connect to Git"). GitHub verbinden und dein Repository
+wählen.</li>
+<li>Bei den Build-Einstellungen: Framework <strong>None</strong>, Build
+command <strong>leer lassen</strong>, Build output directory
+<strong><code>/</code></strong>. Speichern und bereitstellen.</li>
+</ol>
+<p>Wichtig: nicht den Weg "Upload assets" per Drag-and-drop nehmen.
+Dabei wird der Ordner <code>functions</code> laut <a
+href="https://developers.cloudflare.com/pages/platform/known-issues/">Cloudflare-Doku</a>
+nicht ausgeführt, und die Seite wäre offen.</p>
+<p><strong>Schritt 3: Schlüssel festlegen.</strong></p>
+<ol type="1">
+<li>Einen langen Zufallsschlüssel erzeugen. Im Terminal:
+<code>openssl rand -hex 16</code>, oder Claude bitten: "Erzeuge mir eine
+zufällige Zeichenfolge aus 32 Kleinbuchstaben und Ziffern."</li>
+<li>Im Cloudflare-Projekt auf <strong>Settings</strong>, dann
+<strong>Variables and Secrets</strong>, neue Variable vom Typ
+<strong>Secret</strong> mit dem Namen <code>ZUGANGS_SCHLUESSEL</code>
+und dem Schlüssel als Wert. Speichern.</li>
+<li>Unter <strong>Deployments</strong> die letzte Bereitstellung neu
+starten (Retry deployment), damit der Schlüssel greift.</li>
+</ol>
+<p><strong>Schritt 4: prüfen und Link verschicken.</strong></p>
+<ul>
+<li><code>https://&lt;projektname&gt;.pages.dev</code> ohne Schlüssel
+aufrufen: muss "Kein Zugriff." zeigen.</li>
+<li><code>https://&lt;projektname&gt;.pages.dev/?k=&lt;dein-schluessel&gt;</code>
+aufrufen: Seite erscheint, der Schlüssel verschwindet aus der
+Adresszeile.</li>
+<li>Erst wenn beides stimmt, den Link verschicken.</li>
+</ul>
+<p><strong>Schritt 5: GitHub Pages abschalten.</strong> Sonst bleibt die
+Seite unter <code>deinname.github.io</code> für alle offen. Im
+Repository auf <strong>Settings</strong>, <strong>Pages</strong>, Source
+auf <strong>None</strong>. Danach kannst du das Repository unter
+Settings, General, ganz unten auf <strong>Private</strong> stellen,
+Cloudflare liest es trotzdem.</p>
+<p>Zum Testen auf dem eigenen Laptop (optional, braucht Node.js): im
+Projektordner
+<code>npx wrangler pages dev . --binding ZUGANGS_SCHLUESSEL=test123</code>,
+dann <code>http://localhost:8788/?k=test123</code> öffnen.</p>
 <hr />
 <h2 id="8-wenn-etwas-nicht-geht">8. Wenn etwas nicht geht</h2>
 <p>Erst Claude fragen, dann uns. Die ganze Fehlermeldung in

@@ -22,6 +22,7 @@ Rahmen, den du einhalten sollst:
 - **Frag nach, bevor du Dateien löschst** oder die Struktur umbaust.
 - **Zur fertigen Seite gehören:** Impressum, kurzer Datenschutzhinweis, sinnvoller Seitentitel, funktionierende Links, lesbar auf dem Handy.
 - **Nichts von fremden Servern laden**, wenn es sich vermeiden lässt. Schriften als Datei in einen Ordner `fonts/` legen und lokal einbinden, statt sie bei Google Fonts oder Fontshare abzurufen. Wenn doch etwas per CDN kommt (Tailwind, AOS), sag es der Person und nimm es in den Datenschutzhinweis auf.
+- **Seite nur per Link erreichbar?** Dafür steht in Abschnitt 7 eine geprüfte Anleitung mit Cloudflare Pages und fertigem Script. Nimm genau dieses Script, schreib kein eigenes.
 - **Case Studies kommen nach der Startseite.** Solange es keine Unterseiten gibt, verlinkt die Projektkarte auf ein GitHub-Repo, ein PDF oder gar nicht.
 
 Den Aufbau, den die Seite haben soll, findest du unten unter "Der Bauplan". Die erlaubten Quellen für Schrift, Icons, Bilder und fertige Bauteile stehen unter "Bauteile". Nimm nichts, was dort nicht steht, ohne es zu sagen.
@@ -274,6 +275,70 @@ Kostenlos, dauert zehn Minuten, die URL sieht aus wie `deinname.github.io/portfo
 Offizielle Anleitung: [docs.github.com/en/pages](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)
 
 Wenn die Seite weiß bleibt: Datei heißt wirklich `index.html` (klein geschrieben), liegt im Wurzelverzeichnis, und Bildpfade stimmen in Groß- und Kleinschreibung. GitHub ist da strenger als dein Laptop.
+
+### Optional: Seite nur mit Link erreichbar (Cloudflare Pages)
+
+Eine Seite auf GitHub Pages kann jeder aufrufen, auch wenn das Repository privat ist. Wer die Seite nur Leuten zeigen will, denen er den Link schickt, nimmt Cloudflare Pages, kostenlos. Ein kleines Script (eine "Middleware", sie läuft vor jedem Seitenaufruf) lässt nur Besucher durch, deren Link einen geheimen Schlüssel enthält, etwa `https://deinname.pages.dev/?k=8f3a91...`. Beim ersten Aufruf merkt sich der Browser den Zugang 30 Tage lang, danach lässt sich normal auf der Seite klicken. Ohne Link erscheint "Kein Zugriff."
+
+Grenzen: Wer den Link hat, kann ihn weiterschicken. Willst du alte Links sperren, änderst du den Schlüssel. Kostenlos sind 100.000 Aufrufe pro Tag ([Cloudflare-Preise](https://developers.cloudflare.com/pages/functions/pricing/)).
+
+**Schritt 1: Script anlegen.** In deinem Projektordner neben der `index.html` einen Ordner `functions` anlegen, darin die Datei `_middleware.js` mit diesem Inhalt (Unterstrich am Anfang, genau so):
+
+```js
+// Lässt nur Besucher durch, die den Link mit ?k=<Schlüssel> haben.
+// Danach merkt sich der Browser den Zugang 30 Tage lang per Cookie.
+export async function onRequest({ request, env, next }) {
+  const key = env.ZUGANGS_SCHLUESSEL;
+  if (!key) return new Response('Kein Zugriff.', { status: 403 });
+
+  const url = new URL(request.url);
+  if (url.searchParams.get('k') === key) {
+    url.searchParams.delete('k');
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: url.pathname + url.search,
+        'Set-Cookie': `zugang=${key}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000`,
+      },
+    });
+  }
+
+  const cookies = (request.headers.get('Cookie') || '').split(/;\s*/);
+  if (cookies.includes(`zugang=${key}`)) {
+    const res = await next();
+    const out = new Response(res.body, res);
+    out.headers.set('X-Robots-Tag', 'noindex');
+    return out;
+  }
+  return new Response('Kein Zugriff.', { status: 403 });
+}
+```
+
+Der Ordner `functions` muss im selben Ordner liegen wie die `index.html`, nicht darunter. Danach den Ordner mit dem Script ins GitHub-Repository hochladen (Upload files, wie oben).
+
+**Schritt 2: Cloudflare verbinden.**
+
+1. Kostenloses Konto auf [cloudflare.com](https://dash.cloudflare.com/sign-up) anlegen.
+2. Im Dashboard auf **Workers & Pages**, dann **Create**, Reiter **Pages**, dann **Import an existing Git repository** (heißt je nach Stand auch "Connect to Git"). GitHub verbinden und dein Repository wählen.
+3. Bei den Build-Einstellungen: Framework **None**, Build command **leer lassen**, Build output directory **`/`**. Speichern und bereitstellen.
+
+Wichtig: nicht den Weg "Upload assets" per Drag-and-drop nehmen. Dabei wird der Ordner `functions` laut [Cloudflare-Doku](https://developers.cloudflare.com/pages/platform/known-issues/) nicht ausgeführt, und die Seite wäre offen.
+
+**Schritt 3: Schlüssel festlegen.**
+
+1. Einen langen Zufallsschlüssel erzeugen. Im Terminal: `openssl rand -hex 16`, oder Claude bitten: "Erzeuge mir eine zufällige Zeichenfolge aus 32 Kleinbuchstaben und Ziffern."
+2. Im Cloudflare-Projekt auf **Settings**, dann **Variables and Secrets**, neue Variable vom Typ **Secret** mit dem Namen `ZUGANGS_SCHLUESSEL` und dem Schlüssel als Wert. Speichern.
+3. Unter **Deployments** die letzte Bereitstellung neu starten (Retry deployment), damit der Schlüssel greift.
+
+**Schritt 4: prüfen und Link verschicken.**
+
+- `https://<projektname>.pages.dev` ohne Schlüssel aufrufen: muss "Kein Zugriff." zeigen.
+- `https://<projektname>.pages.dev/?k=<dein-schluessel>` aufrufen: Seite erscheint, der Schlüssel verschwindet aus der Adresszeile.
+- Erst wenn beides stimmt, den Link verschicken.
+
+**Schritt 5: GitHub Pages abschalten.** Sonst bleibt die Seite unter `deinname.github.io` für alle offen. Im Repository auf **Settings**, **Pages**, Source auf **None**. Danach kannst du das Repository unter Settings, General, ganz unten auf **Private** stellen, Cloudflare liest es trotzdem.
+
+Zum Testen auf dem eigenen Laptop (optional, braucht Node.js): im Projektordner `npx wrangler pages dev . --binding ZUGANGS_SCHLUESSEL=test123`, dann `http://localhost:8788/?k=test123` öffnen.
 
 ---
 
