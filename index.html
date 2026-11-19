@@ -628,6 +628,103 @@ unten <strong>Delete project</strong>.</p>
 Projektordner
 <code>npx wrangler pages dev . --binding ZUGANGS_SCHLUESSEL=test123</code>,
 dann <code>http://localhost:8788/?k=test123</code> öffnen.</p>
+<p><strong>Erweiterung: ein eigener Link pro Person.</strong> Mit dem
+Script oben haben alle denselben Link, ein neuer Schlüssel sperrt alle
+auf einmal. Wer jeder Person (etwa jeder Firma, bei der du dich
+bewirbst) einen eigenen Link geben will, optional mit Ablaufdatum und
+einzeln sperrbar, ersetzt den Inhalt von
+<code>functions/_middleware.js</code> auf GitHub durch diese Fassung
+(Datei öffnen, Stift-Symbol, alles ersetzen, <strong>Commit
+changes</strong>):</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode js"><code class="sourceCode javascript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Zugang nur per persönlichem Link: https://&lt;seite&gt;/?k=&lt;Schlüssel&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Die erlaubten Schlüssel stehen im Cloudflare-Secret ZUGAENGE, getrennt durch Komma</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">// oder Zeilenumbruch. Jeder Eintrag: name=schlüssel oder name=schlüssel:JJJJ-MM-TT</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">//   Beispiel: lennard=8f3a91..., bcg=91bc4e...:2026-12-31</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Mit Datum gilt der Link bis einschließlich zu diesem Tag (UTC), ohne Datum unbegrenzt.</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Eintrag löschen sperrt genau diesen Link, auch für Leute, die schon drin waren:</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Das Cookie wird bei jedem Aufruf gegen die aktuelle Liste geprüft.</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">// Gibt es ZUGAENGE nicht, gilt der einzelne Schlüssel aus ZUGANGS_SCHLUESSEL.</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">erlaubteSchluessel</span>(env) {</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> roh <span class="op">=</span> env<span class="op">.</span><span class="at">ZUGAENGE</span> <span class="op">||</span> (env<span class="op">.</span><span class="at">ZUGANGS_SCHLUESSEL</span> <span class="op">?</span> <span class="vs">`standard=</span><span class="sc">${</span>env<span class="op">.</span><span class="at">ZUGANGS_SCHLUESSEL</span><span class="sc">}</span><span class="vs">`</span> <span class="op">:</span> <span class="st">&#39;&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> heute <span class="op">=</span> <span class="kw">new</span> <span class="bu">Date</span>()<span class="op">.</span><span class="fu">toISOString</span>()<span class="op">.</span><span class="fu">slice</span>(<span class="dv">0</span><span class="op">,</span> <span class="dv">10</span>)<span class="op">;</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> gueltig <span class="op">=</span> <span class="kw">new</span> <span class="bu">Set</span>()<span class="op">;</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> eintrag <span class="kw">of</span> roh<span class="op">.</span><span class="fu">split</span>(<span class="ss">/</span><span class="sc">[\n,;]+</span><span class="ss">/</span>)) {</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> m <span class="op">=</span> eintrag<span class="op">.</span><span class="fu">trim</span>()<span class="op">.</span><span class="fu">match</span>(<span class="ss">/</span><span class="sc">^[^=\s]+\s*</span><span class="ss">=</span><span class="sc">\s*([A-Za-z0-9_-]{16,})(?</span><span class="ss">:</span><span class="sc">\s*</span><span class="ss">:</span><span class="sc">\s*(\d{4}</span><span class="ss">-</span><span class="sc">\d{2}</span><span class="ss">-</span><span class="sc">\d{2}))?$</span><span class="ss">/</span>)<span class="op">;</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="op">!</span>m) <span class="cf">continue</span><span class="op">;</span> <span class="co">// kaputte Einträge zählen nicht</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> [<span class="op">,</span> schluessel<span class="op">,</span> ablauf] <span class="op">=</span> m<span class="op">;</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (ablauf <span class="op">&amp;&amp;</span> ablauf <span class="op">&lt;</span> heute) <span class="cf">continue</span><span class="op">;</span> <span class="co">// abgelaufen</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    gueltig<span class="op">.</span><span class="fu">add</span>(schluessel)<span class="op">;</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> gueltig<span class="op">;</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> KEIN_ZUGRIFF <span class="op">=</span> () <span class="kw">=&gt;</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>  <span class="kw">new</span> <span class="fu">Response</span>(<span class="st">&#39;Kein Zugriff. Dieser Link ist ungültig oder abgelaufen.&#39;</span><span class="op">,</span> {</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="dt">status</span><span class="op">:</span> <span class="dv">403</span><span class="op">,</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">headers</span><span class="op">:</span> { <span class="st">&#39;Content-Type&#39;</span><span class="op">:</span> <span class="st">&#39;text/plain; charset=utf-8&#39;</span><span class="op">,</span> <span class="st">&#39;Cache-Control&#39;</span><span class="op">:</span> <span class="st">&#39;no-store&#39;</span> }<span class="op">,</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">async</span> <span class="kw">function</span> <span class="fu">onRequest</span>({ request<span class="op">,</span> env<span class="op">,</span> next }) {</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> gueltig <span class="op">=</span> <span class="fu">erlaubteSchluessel</span>(env)<span class="op">;</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (gueltig<span class="op">.</span><span class="at">size</span> <span class="op">===</span> <span class="dv">0</span>) <span class="cf">return</span> <span class="fu">KEIN_ZUGRIFF</span>()<span class="op">;</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> url <span class="op">=</span> <span class="kw">new</span> <span class="fu">URL</span>(request<span class="op">.</span><span class="at">url</span>)<span class="op">;</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> ausLink <span class="op">=</span> url<span class="op">.</span><span class="at">searchParams</span><span class="op">.</span><span class="fu">get</span>(<span class="st">&#39;k&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (ausLink <span class="op">!==</span> <span class="kw">null</span>) {</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="op">!</span>gueltig<span class="op">.</span><span class="fu">has</span>(ausLink)) <span class="cf">return</span> <span class="fu">KEIN_ZUGRIFF</span>()<span class="op">;</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>    url<span class="op">.</span><span class="at">searchParams</span><span class="op">.</span><span class="fu">delete</span>(<span class="st">&#39;k&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">new</span> <span class="fu">Response</span>(<span class="kw">null</span><span class="op">,</span> {</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>      <span class="dt">status</span><span class="op">:</span> <span class="dv">302</span><span class="op">,</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>      <span class="dt">headers</span><span class="op">:</span> {</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Location</span><span class="op">:</span> url<span class="op">.</span><span class="at">pathname</span> <span class="op">+</span> url<span class="op">.</span><span class="at">search</span><span class="op">,</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;Set-Cookie&#39;</span><span class="op">:</span> <span class="vs">`zugang=</span><span class="sc">${</span>ausLink<span class="sc">}</span><span class="vs">; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000`</span><span class="op">,</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;Cache-Control&#39;</span><span class="op">:</span> <span class="st">&#39;no-store&#39;</span><span class="op">,</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>      }<span class="op">,</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> cookie <span class="op">=</span> (request<span class="op">.</span><span class="at">headers</span><span class="op">.</span><span class="fu">get</span>(<span class="st">&#39;Cookie&#39;</span>) <span class="op">||</span> <span class="st">&#39;&#39;</span>)</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">split</span>(<span class="ss">/;</span><span class="sc">\s*</span><span class="ss">/</span>)</span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">find</span>((c) <span class="kw">=&gt;</span> c<span class="op">.</span><span class="fu">startsWith</span>(<span class="st">&#39;zugang=&#39;</span>))<span class="op">;</span></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (cookie <span class="op">&amp;&amp;</span> gueltig<span class="op">.</span><span class="fu">has</span>(cookie<span class="op">.</span><span class="fu">slice</span>(<span class="st">&#39;zugang=&#39;</span><span class="op">.</span><span class="at">length</span>))) {</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> res <span class="op">=</span> <span class="cf">await</span> <span class="fu">next</span>()<span class="op">;</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> out <span class="op">=</span> <span class="kw">new</span> <span class="fu">Response</span>(res<span class="op">.</span><span class="at">body</span><span class="op">,</span> res)<span class="op">;</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>    out<span class="op">.</span><span class="at">headers</span><span class="op">.</span><span class="fu">set</span>(<span class="st">&#39;X-Robots-Tag&#39;</span><span class="op">,</span> <span class="st">&#39;noindex&#39;</span>)<span class="op">;</span></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out<span class="op">;</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="fu">KEIN_ZUGRIFF</span>()<span class="op">;</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>So richtest du die Links ein:</p>
+<ol type="1">
+<li>Pro Person einen eigenen Zufallsschlüssel erzeugen (wie in Schritt
+3).</li>
+<li>Die Liste schreiben, Einträge mit Komma getrennt:
+<code>name=schlüssel</code> für unbegrenzt,
+<code>name=schlüssel:JJJJ-MM-TT</code> für einen Link, der bis
+einschließlich zu diesem Tag gilt. Beispiel:
+<code>ich=8f3a91...,bcg=91bc4e...:2026-12-31,zf=77d0a2...</code></li>
+<li>In Cloudflare unter <strong>Settings</strong>, <strong>Variables and
+Secrets</strong> ein neues Secret <code>ZUGAENGE</code> mit dieser Liste
+als Wert anlegen, dann <strong>Retry deployment</strong> und warten, bis
+die Bereitstellung fertig ist. Solange es <code>ZUGAENGE</code> nicht
+gibt, gilt weiter der alte <code>ZUGANGS_SCHLUESSEL</code>.</li>
+<li>Jede Person bekommt ihren Link:
+<code>https://&lt;projektname&gt;.pages.dev/?k=&lt;ihr-schluessel&gt;</code>.</li>
+</ol>
+<p>Person sperren: ihren Eintrag aus der Liste löschen, Secret neu
+speichern, Retry deployment. Das sperrt sofort genau diesen Link, auch
+wenn die Person schon auf der Seite war. Neue Person: Eintrag anhängen,
+genauso speichern. Wichtig: Cloudflare zeigt ein Secret nach dem
+Speichern nicht mehr an. Bewahre die aktuelle Liste deshalb bei dir auf
+(nicht auf GitHub!), etwa in einer Notiz, und füge beim Ändern immer die
+komplette Liste ein.</p>
+<p>Zum Testen auf dem Laptop:
+<code>npx wrangler pages dev . --binding "ZUGAENGE=test=aaaaaaaaaaaaaaaa1111"</code>,
+dann <code>http://localhost:8788/?k=aaaaaaaaaaaaaaaa1111</code>
+öffnen.</p>
 <h4 id="variante-b-passwort-mit-staticrypt-notlösung">Variante B:
 Passwort mit StatiCrypt (Notlösung)</h4>
 <p>Für alle, die kein Cloudflare-Konto wollen. <a

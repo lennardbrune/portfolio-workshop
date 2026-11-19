@@ -353,6 +353,82 @@ Der Ordner `functions` muss im selben Ordner liegen wie die `index.html`, nicht 
 
 Zum Testen auf dem eigenen Laptop (optional, braucht Node.js): im Projektordner `npx wrangler pages dev . --binding ZUGANGS_SCHLUESSEL=test123`, dann `http://localhost:8788/?k=test123` öffnen.
 
+**Erweiterung: ein eigener Link pro Person.** Mit dem Script oben haben alle denselben Link, ein neuer Schlüssel sperrt alle auf einmal. Wer jeder Person (etwa jeder Firma, bei der du dich bewirbst) einen eigenen Link geben will, optional mit Ablaufdatum und einzeln sperrbar, ersetzt den Inhalt von `functions/_middleware.js` auf GitHub durch diese Fassung (Datei öffnen, Stift-Symbol, alles ersetzen, **Commit changes**):
+
+```js
+// Zugang nur per persönlichem Link: https://<seite>/?k=<Schlüssel>
+//
+// Die erlaubten Schlüssel stehen im Cloudflare-Secret ZUGAENGE, getrennt durch Komma
+// oder Zeilenumbruch. Jeder Eintrag: name=schlüssel oder name=schlüssel:JJJJ-MM-TT
+//   Beispiel: lennard=8f3a91..., bcg=91bc4e...:2026-12-31
+// Mit Datum gilt der Link bis einschließlich zu diesem Tag (UTC), ohne Datum unbegrenzt.
+// Eintrag löschen sperrt genau diesen Link, auch für Leute, die schon drin waren:
+// Das Cookie wird bei jedem Aufruf gegen die aktuelle Liste geprüft.
+// Gibt es ZUGAENGE nicht, gilt der einzelne Schlüssel aus ZUGANGS_SCHLUESSEL.
+
+function erlaubteSchluessel(env) {
+  const roh = env.ZUGAENGE || (env.ZUGANGS_SCHLUESSEL ? `standard=${env.ZUGANGS_SCHLUESSEL}` : '');
+  const heute = new Date().toISOString().slice(0, 10);
+  const gueltig = new Set();
+  for (const eintrag of roh.split(/[\n,;]+/)) {
+    const m = eintrag.trim().match(/^[^=\s]+\s*=\s*([A-Za-z0-9_-]{16,})(?:\s*:\s*(\d{4}-\d{2}-\d{2}))?$/);
+    if (!m) continue; // kaputte Einträge zählen nicht
+    const [, schluessel, ablauf] = m;
+    if (ablauf && ablauf < heute) continue; // abgelaufen
+    gueltig.add(schluessel);
+  }
+  return gueltig;
+}
+
+const KEIN_ZUGRIFF = () =>
+  new Response('Kein Zugriff. Dieser Link ist ungültig oder abgelaufen.', {
+    status: 403,
+    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
+  });
+
+export async function onRequest({ request, env, next }) {
+  const gueltig = erlaubteSchluessel(env);
+  if (gueltig.size === 0) return KEIN_ZUGRIFF();
+
+  const url = new URL(request.url);
+  const ausLink = url.searchParams.get('k');
+  if (ausLink !== null) {
+    if (!gueltig.has(ausLink)) return KEIN_ZUGRIFF();
+    url.searchParams.delete('k');
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: url.pathname + url.search,
+        'Set-Cookie': `zugang=${ausLink}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000`,
+        'Cache-Control': 'no-store',
+      },
+    });
+  }
+
+  const cookie = (request.headers.get('Cookie') || '')
+    .split(/;\s*/)
+    .find((c) => c.startsWith('zugang='));
+  if (cookie && gueltig.has(cookie.slice('zugang='.length))) {
+    const res = await next();
+    const out = new Response(res.body, res);
+    out.headers.set('X-Robots-Tag', 'noindex');
+    return out;
+  }
+  return KEIN_ZUGRIFF();
+}
+```
+
+So richtest du die Links ein:
+
+1. Pro Person einen eigenen Zufallsschlüssel erzeugen (wie in Schritt 3).
+2. Die Liste schreiben, Einträge mit Komma getrennt: `name=schlüssel` für unbegrenzt, `name=schlüssel:JJJJ-MM-TT` für einen Link, der bis einschließlich zu diesem Tag gilt. Beispiel: `ich=8f3a91...,bcg=91bc4e...:2026-12-31,zf=77d0a2...`
+3. In Cloudflare unter **Settings**, **Variables and Secrets** ein neues Secret `ZUGAENGE` mit dieser Liste als Wert anlegen, dann **Retry deployment** und warten, bis die Bereitstellung fertig ist. Solange es `ZUGAENGE` nicht gibt, gilt weiter der alte `ZUGANGS_SCHLUESSEL`.
+4. Jede Person bekommt ihren Link: `https://<projektname>.pages.dev/?k=<ihr-schluessel>`.
+
+Person sperren: ihren Eintrag aus der Liste löschen, Secret neu speichern, Retry deployment. Das sperrt sofort genau diesen Link, auch wenn die Person schon auf der Seite war. Neue Person: Eintrag anhängen, genauso speichern. Wichtig: Cloudflare zeigt ein Secret nach dem Speichern nicht mehr an. Bewahre die aktuelle Liste deshalb bei dir auf (nicht auf GitHub!), etwa in einer Notiz, und füge beim Ändern immer die komplette Liste ein.
+
+Zum Testen auf dem Laptop: `npx wrangler pages dev . --binding "ZUGAENGE=test=aaaaaaaaaaaaaaaa1111"`, dann `http://localhost:8788/?k=aaaaaaaaaaaaaaaa1111` öffnen.
+
 #### Variante B: Passwort mit StatiCrypt (Notlösung)
 
 Für alle, die kein Cloudflare-Konto wollen. [StatiCrypt](https://github.com/robinmoisson/staticrypt) verschlüsselt deine `index.html`. Wer die Seite öffnet, sieht zuerst ein Passwortfeld, erst mit dem richtigen Passwort erscheint deine Seite. Das Verschlüsseln läuft komplett in deinem Browser, deine Datei wird dabei nirgendwo hochgeladen.
